@@ -1,0 +1,83 @@
+// Assemble the single-file deliverable: index.html
+const fs = require('fs');
+const path = require('path');
+const root = __dirname;
+const three = fs.readFileSync(path.join(root, 'vendor', 'three.min.js'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'src', 'app.js'), 'utf8');
+const license = fs.readFileSync(path.join(root, 'vendor', 'three.LICENSE.txt'), 'utf8');
+
+const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Hogwarts Quidditch Pitch &mdash; a 3D Diorama</title>
+<meta name="description" content="A fully self-contained, orbitable 3D diorama of the Hogwarts Quidditch pitch.">
+<!--
+  Three.js r128 (MIT License) is inlined below. ${license.replace(/\r?\n/g, ' ').trim()}
+-->
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #f5f1e7; }
+  #stage { position: fixed; inset: 0; }
+  #scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab;
+           filter: saturate(1.12) contrast(1.06); }
+  #vignette { position: fixed; inset: 0; z-index: 2; pointer-events: none;
+              background: radial-gradient(120% 100% at 50% 46%, rgba(245,241,231,0) 62%, rgba(70,84,82,0.055) 100%); }
+  #scene.grabbing { cursor: grabbing; }
+  #hud {
+    position: fixed; right: 18px; bottom: 18px; z-index: 10;
+    display: flex; gap: 8px; align-items: center;
+    user-select: none; -webkit-user-select: none;
+  }
+  .pill {
+    appearance: none; -webkit-appearance: none;
+    border: 1px solid rgba(52, 74, 80, 0.16);
+    background: rgba(250, 246, 237, 0.82);
+    -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px);
+    color: #344a50;
+    font: 500 12px/1 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: 0.03em;
+    padding: 9px 14px; border-radius: 999px; cursor: pointer;
+    box-shadow: 0 1px 2px rgba(52, 74, 80, 0.10), 0 8px 22px rgba(52, 74, 80, 0.07);
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+  }
+  .pill:hover { background: rgba(255, 252, 245, 0.96); }
+  .pill:active { transform: translateY(1px); }
+  .pill:focus-visible { outline: 2px solid rgba(201, 155, 67, 0.75); outline-offset: 2px; }
+  .pill.on { background: #344a50; border-color: #344a50; color: #f7f2e6; }
+  .pill.on:hover { background: #3d565d; }
+  #hint {
+    position: fixed; left: 50%; bottom: 22px; z-index: 9;
+    transform: translateX(-50%);
+    padding: 8px 15px; border-radius: 999px;
+    background: rgba(250, 246, 237, 0.62);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    color: rgba(52, 74, 80, 0.7);
+    font: 400 12px/1 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: 0.04em; white-space: nowrap;
+    pointer-events: none; opacity: 1; transition: opacity 0.9s ease;
+  }
+  #hint.hide { opacity: 0; }
+  @media (max-width: 720px) {
+    #hint { display: none; }
+    #hud { right: 10px; bottom: 10px; gap: 6px; }
+    .pill { padding: 8px 11px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="vignette"></div>
+<div id="hint">Drag to orbit &middot; Scroll to zoom &middot; Double-click to reset</div>
+<div id="hud">
+  <button id="btn-proj" class="pill" type="button" title="Switch projection">Orthographic</button>
+  <button id="btn-auto" class="pill on" type="button" title="Toggle idle auto-rotation">Auto-rotate</button>
+  <button id="btn-reset" class="pill" type="button" title="Reset the camera">Reset</button>
+</div>
+<script>${three}<\/script>
+<script>${app}<\/script>
+</body>
+</html>
+`;
+fs.writeFileSync(path.join(root, 'index.html'), html);
+console.log('index.html written:', (Buffer.byteLength(html) / 1024).toFixed(1) + ' KB');
